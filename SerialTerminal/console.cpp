@@ -105,11 +105,11 @@ void Console::keyPressEvent(QKeyEvent *e)
         break;
 
     case Qt::Key_Up:
-        selectHistoryData(&(++historyInputIndex));
+        selectHistoryData(true);
         return;
 
     case Qt::Key_Down:
-        selectHistoryData(&(--historyInputIndex));
+        selectHistoryData(false);
         return;
 
     case Qt::Key_Backspace:
@@ -127,7 +127,7 @@ void Console::keyPressEvent(QKeyEvent *e)
             historyInputDataList.prepend(inputData.data());
             historyInputDataList.removeLast();
             inputData.clear();
-            historyInputIndex = 0;
+            historyInputIndex = -1;
         }
         qDebug() <<"input data list " <<  historyInputDataList;
         addStartChar();
@@ -176,9 +176,8 @@ void Console::addStartChar()
 
 
 
-void Console::selectHistoryData(int *idx)
+void Console::selectHistoryData(bool upSelect)
 {
-    int index = *idx;
     QTextCursor cursor = textCursor();
 
     // 获取当前行的文本
@@ -191,13 +190,22 @@ void Console::selectHistoryData(int *idx)
 
     cursor.removeSelectedText();
 
-    if(index < 1 || index > 5){
+    if(upSelect){
+        historyInputIndex = historyInputIndex >= 4 ? 4 : historyInputIndex + 1;
+    }else {
+        historyInputIndex = historyInputIndex <= 0 ? -1 : historyInputIndex - 1;
+    }
+
+    if(historyInputIndex < 0){
+        inputData.clear();
         return;
     }
-    QString historyData = historyInputDataList[index - 1];
-    if(historyData.isEmpty() && index >= 2){
-        historyData = historyInputDataList[index - 2];
-        *idx -= 1;
+
+    QString historyData = historyInputDataList[historyInputIndex];
+
+    if(historyData.isEmpty() && historyInputIndex > 0){
+        historyInputIndex -= 1;
+        historyData = historyInputDataList[historyInputIndex];
     }
 
     cursor.insertText(historyData);

@@ -35,7 +35,7 @@ protected:
 private:
     bool checkCursorPos();
     void addStartChar();
-    void selectHistoryData(int *idx);
+    void selectHistoryData(bool upSelect);
 
 private:
     QByteArray inputData = nullptr;
